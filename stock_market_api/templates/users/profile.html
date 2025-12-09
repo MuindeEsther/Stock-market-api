@@ -1,0 +1,136 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Profile - {{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-user-circle fa-5x text-primary"></i>
+                </div>
+                <h3 class="card-title">{{ user.get_full_name|default:user.username }}</h3>
+                <p class="text-muted">@{{ user.username }}</p>
+                <p class="text-muted">
+                    <i class="fas fa-envelope me-2"></i>{{ user.email }}
+                </p>
+                <p class="text-muted">
+                    <i class="fas fa-calendar me-2"></i>Member since {{ user.date_joined|date:"M d, Y" }}
+                </p>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-cog me-2"></i>Preferences
+                </h5>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <strong>Currency:</strong> {{ user.preferred_currency }}
+                    </li>
+                    <li class="mb-2">
+                        <strong>Email Notifications:</strong> 
+                        {% if user.email_notifications %}
+                        <span class="badge bg-success">Enabled</span>
+                        {% else %}
+                        <span class="badge bg-secondary">Disabled</span>
+                        {% endif %}
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-edit me-2"></i>Update Profile
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {% if messages %}
+                    <div class="alert alert-success">
+                        Profile updated successfully!
+                    </div>
+                    {% endif %}
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_first_name" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="id_first_name" 
+                                   name="first_name" value="{{ user.first_name }}">
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="id_last_name" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="id_last_name" 
+                                   name="last_name" value="{{ user.last_name }}">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="id_username" 
+                               name="username" value="{{ user.username }}" readonly>
+                        <small class="form-text text-muted">Username cannot be changed</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="id_email" 
+                               name="email" value="{{ user.email }}" readonly>
+                        <small class="form-text text-muted">Email cannot be changed</small>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_preferred_currency" class="form-label">Preferred Currency</label>
+                            <select class="form-select" id="id_preferred_currency" name="preferred_currency">
+                                <option value="USD" {% if user.preferred_currency == 'USD' %}selected{% endif %}>USD ($)</option>
+                                <option value="EUR" {% if user.preferred_currency == 'EUR' %}selected{% endif %}>EUR (€)</option>
+                                <option value="GBP" {% if user.preferred_currency == 'GBP' %}selected{% endif %}>GBP (£)</option>
+                                <option value="JPY" {% if user.preferred_currency == 'JPY' %}selected{% endif %}>JPY (¥)</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email Notifications</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" 
+                                       id="id_email_notifications" name="email_notifications"
+                                       {% if user.email_notifications %}checked{% endif %}>
+                                <label class="form-check-label" for="id_email_notifications">
+                                    Enable email notifications
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Save Changes
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header bg-warning">
+                <h5 class="mb-0">
+                    <i class="fas fa-key me-2"></i>Change Password
+                </h5>
+            </div>
+            <div class="card-body">
+                <a href="{% url 'users:password_change' %}" class="btn btn-warning">
+                    <i class="fas fa-lock me-2"></i>Change Password
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

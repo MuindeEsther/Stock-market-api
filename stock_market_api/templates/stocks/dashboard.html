@@ -1,0 +1,250 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Dashboard - Stock Market Analytics{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h1 class="display-5">
+            <i class="fas fa-tachometer-alt me-3"></i>Dashboard
+        </h1>
+        <p class="lead text-muted">Welcome back, {{ user.get_full_name|default:user.username }}!</p>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-0">Total Stocks</h6>
+                        <h2 class="mb-0">0</h2>
+                    </div>
+                    <i class="fas fa-chart-line fa-3x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-0">Watchlists</h6>
+                        <h2 class="mb-0">0</h2>
+                    </div>
+                    <i class="fas fa-star fa-3x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-0">Alerts</h6>
+                        <h2 class="mb-0">0</h2>
+                    </div>
+                    <i class="fas fa-bell fa-3x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="card-title mb-0">Portfolio Value</h6>
+                        <h2 class="mb-0">$0</h2>
+                    </div>
+                    <i class="fas fa-wallet fa-3x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Market Overview -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>Market Overview
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="marketChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-arrow-trend-up me-2"></i>Top Gainers
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if top_gainers %}
+                <div class="list-group list-group-flush">
+                    {% for stock in top_gainers %}
+                    <a href="{% url 'stocks:stock_detail' stock.ticker %}" 
+                       class="list-group-item list-group-item-action">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong>{{ stock.ticker }}</strong>
+                                <br>
+                                <small class="text-muted">{{ stock.company_name|truncatewords:3 }}</small>
+                            </div>
+                            <div class="text-end">
+                                <div class="price-up fw-bold">
+                                    <i class="fas fa-arrow-up"></i>
+                                    {{ stock.price_change_percent|floatformat:2 }}%
+                                </div>
+                                <small>${{ stock.current_price|floatformat:2 }}</small>
+                            </div>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted text-center">No data available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- My Watchlists -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-star me-2"></i>My Watchlists
+                </h5>
+                <button class="btn btn-sm btn-light">
+                    <i class="fas fa-plus me-2"></i>Create Watchlist
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="text-center py-5">
+                    <i class="fas fa-star fa-3x text-muted mb-3"></i>
+                    <h5>No Watchlists Yet</h5>
+                    <p class="text-muted">Create your first watchlist to track your favorite stocks</p>
+                    <button class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Create Your First Watchlist
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recently Viewed -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-history me-2"></i>Recently Updated Stocks
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if recent_stocks %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Ticker</th>
+                                <th>Company</th>
+                                <th>Sector</th>
+                                <th class="text-end">Price</th>
+                                <th class="text-end">Change</th>
+                                <th class="text-end">Volume</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stock in recent_stocks %}
+                            <tr>
+                                <td><strong>{{ stock.ticker }}</strong></td>
+                                <td>{{ stock.company_name|truncatewords:5 }}</td>
+                                <td><span class="badge bg-secondary">{{ stock.sector|default:"N/A" }}</span></td>
+                                <td class="text-end">${{ stock.current_price|floatformat:2|default:"N/A" }}</td>
+                                <td class="text-end">
+                                    {% if stock.price_change %}
+                                    <span class="{% if stock.price_change >= 0 %}price-up{% else %}price-down{% endif %}">
+                                        <i class="fas fa-arrow-{% if stock.price_change >= 0 %}up{% else %}down{% endif %}"></i>
+                                        {{ stock.price_change_percent|floatformat:2 }}%
+                                    </span>
+                                    {% else %}
+                                    N/A
+                                    {% endif %}
+                                </td>
+                                <td class="text-end">{{ stock.volume|default:"N/A" }}</td>
+                                <td class="text-end">
+                                    <a href="{% url 'stocks:stock_detail' stock.ticker %}" 
+                                       class="btn btn-sm btn-primary">
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted text-center">No stocks available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Sample market overview chart
+    const ctx = document.getElementById('marketChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+            datasets: [{
+                label: 'Market Index',
+                data: [100, 102, 101, 105, 107],
+                borderColor: '#3498db',
+                backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

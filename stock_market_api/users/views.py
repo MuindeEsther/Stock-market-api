@@ -11,10 +11,13 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .models import User
 from .serializers import UserRegistrationSerializer, UserSerializer, UserProfileSerializer
 from .forms import UserRegistrationForm, UserUpdateForm
+from stocks.models import Stock
 
 # Create your views here.
 def home_view(request):
-    return render(request, 'users/home.html')
+    # Get top 5 active sorted by ticker
+    top_stocks = Stock.objects.all().order_by('ticker')[:5]
+    return render(request, 'users/home.html', {'top_stocks': top_stocks})
 class UserRegistrationView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = (AllowAny,)

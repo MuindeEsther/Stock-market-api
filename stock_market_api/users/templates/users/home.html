@@ -1,3 +1,145 @@
-<h1>Welcome to Stock Market API</h1>
-<a href="{% url 'users:login' %}">Login</a> |
-<a href="{% url 'users:register' %}">Register</a>
+{% extends 'base/base.html' %}
+
+{% block title %}Home | Stock Market API{% endblock %}
+
+{% block content %}
+<style>
+body {
+    background-color: #fff8f0;
+    font-family: 'Helvetica', Arial, sans-serif;
+    margin: 0;
+    color: #333;
+}
+
+.hero {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.hero h1 {
+    color: #e97451;
+    font-size: 3rem;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    max-width: 600px;
+    margin: 0 auto 20px;
+}
+
+.btn-primary, .btn-secondary {
+    display: inline-block;
+    margin: 10px 10px;
+    padding: 12px 25px;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #e97451;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #ff8c42;
+}
+
+.btn-secondary {
+    background-color: white;
+    color: #e97451;
+    border: 2px solid #e97451;
+}
+
+.btn-secondary:hover {
+    background-color: #e97451;
+    color: white;
+}
+
+.stocks-table {
+    width: 90%;
+    max-width: 800px;
+    margin: 40px auto;
+    border-collapse: collapse;
+}
+
+.stocks-table th, .stocks-table td {
+    padding: 12px;
+    text-align: center;
+}
+
+.stocks-table th {
+    background-color: #e97451;
+    color: white;
+}
+
+.stocks-table td {
+    background-color: #fff2e6;
+}
+
+.stocks-up {
+    color: green;
+    font-weight: bold;
+}
+
+.stocks-down {
+    color: red;
+    font-weight: bold;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    background-color: #e97451;
+    color: white;
+    font-size: 0.9rem;
+}
+</style>
+
+<div class="hero">
+    <h1>Welcome to Stock Market API</h1>
+    <p>Track stocks, view live prices, analyze trends, and make smarter investment decisions. Get started now!</p>
+    <div>
+        <a href="{% url 'users:login' %}" class="btn-primary">Login</a>
+        <a href="{% url 'users:register' %}" class="btn-secondary">Register</a>
+    </div>
+</div>
+
+<!-- Top Stocks Table -->
+<table class="stocks-table">
+    <thead>
+        <tr>
+            <th>Ticker</th>
+            <th>Company</th>
+            <th>Price</th>
+            <th>Change</th>
+            <th>% Change</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for stock in top_stocks %}
+        <tr>
+            <td>{{ stock.ticker }}</td>
+            <td>{{ stock.company_name }}</td>
+            <td>${{ stock.current_price|default:"0.00" }}</td>
+            {% if stock.price_change >= 0 %}
+            <td class="stocks-up">+${{ stock.price_change|floatformat:2 }}</td>
+            <td class="stocks-up">+{{ stock.price_change_percent|floatformat:2 }}%</td>
+            {% else %}
+            <td class="stocks-down">${{ stock.price_change|floatformat:2 }}</td>
+            <td class="stocks-down">{{ stock.price_change_percent|floatformat:2 }}%</td>
+            {% endif %}
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">No stocks available</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<footer>
+    &copy; 2025 Stock Market API. All rights reserved.
+</footer>
+{% endblock %}

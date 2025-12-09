@@ -3,11 +3,11 @@ from django.utils import timezone
 
 # Create your models here.
 class Stock(models.Model):
-    ticker = models.Charfield(max_length=10, unique=True, db_index=True)
-    company_name = models.Charfield(max_length=255)
+    ticker = models.CharField(max_length=10, unique=True, db_index=True)
+    company_name = models.CharField(max_length=255)
     sector = models.CharField(max_length=100, blank=True)
     industry = models.CharField(max_length=100, blank=True)
-    excahange = models.CharField(max_length=50, blank=True)
+    exchange = models.CharField(max_length=50, blank=True)
     currency = models.CharField(max_length=10, default='USD')
     
     # Latest price data
@@ -98,7 +98,7 @@ class TechnicalIndicator(models.Model):
     value3 = models.DecimalField(max_digits=15, decimal_places=4, null=True, blank=True)
     
     # Period for the indicator (e.g., 14 for 14-day RSI, 50 for 50-day SMA)
-    period = models.IntegerFiled(default=14)
+    period = models.IntegerField(default=14)
     
     created_at = models.DateTimeField(auto_now_add=True)
     

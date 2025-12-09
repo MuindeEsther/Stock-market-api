@@ -13,6 +13,8 @@ from .serializers import UserRegistrationSerializer, UserSerializer, UserProfile
 from .forms import UserRegistrationForm, UserUpdateForm
 
 # Create your views here.
+def home_view(request):
+    return render(request, 'users/home.html')
 class UserRegistrationView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = (AllowAny,)

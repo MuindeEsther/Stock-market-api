@@ -22,10 +22,11 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('api/users/', include('users.urls')),
+    path('api/users/', include('users.api_urls')),
     path('api/stocks/', include('stocks.urls')),
-    path('stocks/', include('stocks.urls')),
-    path('', include('users.urls')),  # For user templates
+    # Template routes
+    
+    path('', include('users.urls', 'users')),  # For user templates
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

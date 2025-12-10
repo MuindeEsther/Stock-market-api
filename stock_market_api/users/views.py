@@ -50,7 +50,7 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def logout_view(request):
+def api_logout_view(request):
     try:
         refresh_token = request.data.get('refresh_token')
         token = RefreshToken(refresh_token)
@@ -70,8 +70,10 @@ def register_view(request):
             login(request, user)
             messages.success(request, 'Registration successful! Welcome to Stock Market Analytics.')
             return redirect('stocks:dashboard')
-        else:
-            form = UserRegistrationForm()
+        # if form is invalid, fall through and re-render with the bound form (shows errors)
+        # do not replace with a fresh form here
+    else:
+        form = UserRegistrationForm()
     return render(request, 'users/register.html', {'form': form})   
 
 def login_view(request):

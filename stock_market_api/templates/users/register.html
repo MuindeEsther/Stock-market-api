@@ -1,0 +1,107 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  :root{
+    --burnt-orange: #CC5500;
+    --warm-cream: #FFF6EE;
+    --charcoal: #2b2b2b;
+    --muted: #6b6b6b;
+  }
+  .reg-wrapper{
+    min-height:70vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:3rem 1rem;
+    background: linear-gradient(180deg, #fffaf6 0%, #fff3ea 100%);
+  }
+  .reg-card{
+    width:100%;
+    max-width:520px;
+    background: white;
+    border-radius:12px;
+    box-shadow:0 8px 30px rgba(0,0,0,0.08);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  }
+  .reg-hero{
+    background: linear-gradient(135deg, var(--burnt-orange), #ff7043);
+    color:var(--warm-cream);
+    padding:2rem;
+  }
+  .reg-hero h2{margin:0 0 .25rem 0;font-size:1.5rem}
+  .reg-hero p{margin:0;font-size:0.95rem;opacity:0.95}
+  .reg-body{padding:1.5rem}
+  .form-row{margin-bottom:1rem}
+  label{display:block;margin-bottom:.35rem;color:var(--charcoal);font-weight:600}
+  .helptext, .errorlist{font-size:.9rem;color:var(--muted)}
+  input[type="text"], input[type="password"], input[type="email"] , select, textarea{
+    width:100%;
+    padding:.6rem .75rem;
+    border:1px solid #e6e6e6;border-radius:8px;font-size:1rem;
+    background:#fff;box-sizing:border-box;
+  }
+  .submit-btn{
+    width:100%;
+    padding:.75rem 1rem;
+    background:var(--burnt-orange);
+    color:white;border:none;border-radius:8px;font-weight:700;font-size:1rem;
+    cursor:pointer;
+  }
+  .meta-row{display:flex;justify-content:space-between;align-items:center;margin-top:.75rem}
+  .link-muted{color:var(--muted);font-size:.95rem;text-decoration:none}
+  .errors{color:#b00020;margin-bottom:.5rem}
+  @media (max-width:420px){.reg-card{border-radius:8px;margin:0 8px}}
+</style>
+
+<div class="reg-wrapper">
+  <div class="reg-card">
+    <div class="reg-hero">
+      <h2>Create your account</h2>
+      <p>Sign up for Stock Market Analytics to track and analyse your favourite stocks.</p>
+    </div>
+
+    <div class="reg-body">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="helptext">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+
+      {% if form.non_field_errors %}
+        <div class="errors">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% for field in form %}
+          <div class="form-row">
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.help_text %}
+              <div class="helptext">{{ field.help_text }}</div>
+            {% endif %}
+            {% if field.errors %}
+              <div class="errors">{{ field.errors|striptags }}</div>
+            {% endif %}
+          </div>
+        {% endfor %}
+
+        <div class="form-row">
+          <button type="submit" class="submit-btn">Register</button>
+        </div>
+
+        <div class="meta-row">
+          <a class="link-muted" href="{% url 'users:login' %}">Already have an account? Log in</a>
+          <a class="link-muted" href="{% url 'users:home' %}">Back to Home</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

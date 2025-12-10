@@ -1,0 +1,101 @@
+{% extends 'base/base.html' %}
+
+{% block title %}{{ action }} Watchlist - Stock Market Analytics{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'watchlists:watchlist_list' %}">Watchlists</a></li>
+                {% if watchlist %}
+                <li class="breadcrumb-item"><a href="{% url 'watchlists:watchlist_detail' watchlist.pk %}">{{ watchlist.name }}</a></li>
+                {% endif %}
+                <li class="breadcrumb-item active">{{ action }}</li>
+            </ol>
+        </nav>
+
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-{% if action == 'Create' %}plus{% else %}edit{% endif %} me-2"></i>
+                    {{ action }} Watchlist
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.name.id_for_label }}" class="form-label">
+                            <i class="fas fa-tag me-2"></i>Watchlist Name *
+                        </label>
+                        {{ form.name }}
+                        {% if form.name.errors %}
+                        <div class="text-danger small">
+                            {{ form.name.errors }}
+                        </div>
+                        {% endif %}
+                        <small class="form-text text-muted">
+                            Give your watchlist a descriptive name
+                        </small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.description.id_for_label }}" class="form-label">
+                            <i class="fas fa-align-left me-2"></i>Description
+                        </label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                        <div class="text-danger small">
+                            {{ form.description.errors }}
+                        </div>
+                        {% endif %}
+                        <small class="form-text text-muted">
+                            Optional description for your watchlist
+                        </small>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check">
+                            {{ form.is_public }}
+                            <label class="form-check-label" for="{{ form.is_public.id_for_label }}">
+                                <i class="fas fa-globe me-2"></i>Make this watchlist public
+                            </label>
+                        </div>
+                        <small class="form-text text-muted">
+                            Public watchlists can be viewed by other users
+                        </small>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>{{ action }} Watchlist
+                        </button>
+                        <a href="{% if watchlist %}{% url 'watchlists:watchlist_detail' watchlist.pk %}{% else %}{% url 'watchlists:watchlist_list' %}{% endif %}" 
+                           class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% if action == 'Create' %}
+        <div class="card mt-3">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-info-circle me-2"></i>Tips for Creating Watchlists
+                </h5>
+                <ul class="mb-0">
+                    <li>Organize stocks by sector, strategy, or investment goals</li>
+                    <li>Use descriptive names like "Tech Growth Stocks" or "Dividend Champions"</li>
+                    <li>Keep multiple watchlists to track different portfolios</li>
+                    <li>Make watchlists public to share your investment ideas</li>
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -24,6 +24,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path('api/users/', include('users.api_urls')),
     path('api/stocks/', include('stocks.urls')),
+    path('watchlists/', include('watchlists.urls')),
     # Template routes
     
     path('', include('users.urls', 'users')),  # For user templates

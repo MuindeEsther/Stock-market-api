@@ -119,16 +119,23 @@ class StockDataFetcher:
                         skipped_count += 1
                         continue
                     
+                    # Handle different column name variations
+                    close_price = row.get('Close', row.get('close', 0))
+                    open_price = row.get('Open', row.get('open', 0))
+                    high_price = row.get('High', row.get('high', 0))
+                    low_price = row.get('Low', row.get('low', 0))
+                    volume = row.get('Volume', row.get('volume', 0))
+                    
                     
                     StockPrice.objects.create(
                         stock=stock,
                         date=date_only,
-                        open=row['Open'],
-                        high=row['High'],
-                        low=row['Low'],
-                        close=row['Close'],
-                        adjusted_close=row['Adj Close'],
-                        volume=row['Volume']
+                        open=open_price,
+                        high=high_price,
+                        low=low_price,
+                        close=close_price,
+                        adjusted_close=close_price,
+                        volume=int(volume) if not pd.isna(volume) else 0
                     )
                     saved_count += 1
             print(f"Saved {saved_count} price records for {ticker}, skipped {skipped_count} existing records.")

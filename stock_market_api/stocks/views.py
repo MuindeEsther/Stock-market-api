@@ -133,7 +133,7 @@ def stock_detail_view(request, ticker):
     user_watchlists = []
     if request.user.is_authenticated:
         from watchlists.models import Watchlist, WatchlistItem
-        user_watchlists = Watchlist.objects.filter(owner=request.user)
+        user_watchlists = Watchlist.objects.filter(user=request.user)
         in_watchlists = WatchlistItem.objects.filter(
             watchlist__in=user_watchlists,
             stock=stock

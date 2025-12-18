@@ -1,0 +1,330 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Sector Analysis - Stock Market Analytics{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h1 class="display-5">
+            <i class="fas fa-industry me-3"></i>Sector Analysis
+        </h1>
+        <p class="lead text-muted">Analyze sector performance and identify opportunities</p>
+    </div>
+</div>
+
+<!-- Sector Performance Overview -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>Sector Performance Overview
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if sectors_data %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Sector</th>
+                                <th>Avg P/E Ratio</th>
+                                <th>Avg Market Cap</th>
+                                <th>Avg Dividend Yield</th>
+                                <th>Stock Count</th>
+                                <th>Avg Price Change</th>
+                                <th>Performance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sector in sectors_data %}
+                            <tr>
+                                <td><strong>{{ sector.sector }}</strong></td>
+                                <td>{{ sector.avg_pe|floatformat:1|default:"N/A" }}</td>
+                                <td>
+                                    {% if sector.avg_market_cap %}
+                                        ${{ sector.avg_market_cap|intcomma }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if sector.avg_div_yield %}
+                                        {{ sector.avg_div_yield|floatformat:2 }}%
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                                <td>{{ sector.stock_count }}</td>
+                                <td>
+                                    {% if sector.avg_price_change %}
+                                        {% if sector.avg_price_change > 0 %}
+                                            <span class="price-up">
+                                                <i class="fas fa-arrow-up"></i> {{ sector.avg_price_change|floatformat:2 }}%
+                                            </span>
+                                        {% elif sector.avg_price_change < 0 %}
+                                            <span class="price-down">
+                                                <i class="fas fa-arrow-down"></i> {{ sector.avg_price_change|floatformat:2 }}%
+                                            </span>
+                                        {% else %}
+                                            <span class="text-muted">{{ sector.avg_price_change|floatformat:2 }}%</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-muted">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if sector.avg_price_change %}
+                                        {% if sector.avg_price_change > 2 %}
+                                            <span class="badge bg-success">Strong</span>
+                                        {% elif sector.avg_price_change > 0 %}
+                                            <span class="badge bg-info">Positive</span>
+                                        {% elif sector.avg_price_change > -2 %}
+                                            <span class="badge bg-warning">Neutral</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Weak</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="badge bg-secondary">Unknown</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Sector Performance Chart -->
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <canvas id="sectorPerformanceChart" width="100%" height="300"></canvas>
+                    </div>
+                </div>
+
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-industry fa-3x text-muted mb-3"></i>
+                    <h5>No Sector Data Available</h5>
+                    <p class="text-muted">Sector analysis requires stock data with sector classifications</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Top Performers by Sector -->
+{% if top_performers %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-trophy me-2"></i>Top Performers by Sector
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for sector, stocks in top_performers.items %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">{{ sector }}</h6>
+                            </div>
+                            <div class="card-body">
+                                {% for stock in stocks %}
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div>
+                                        <strong>{{ stock.ticker }}</strong><br>
+                                        <small class="text-muted">{{ stock.company_name|truncatewords:2 }}</small>
+                                    </div>
+                                    <div class="text-end">
+                                        {% if stock.price_change_pct %}
+                                            {% if stock.price_change_pct > 0 %}
+                                                <span class="price-up fw-bold">
+                                                    <i class="fas fa-arrow-up"></i> {{ stock.price_change_pct|floatformat:2 }}%
+                                                </span>
+                                            {% else %}
+                                                <span class="price-down fw-bold">
+                                                    <i class="fas fa-arrow-down"></i> {{ stock.price_change_pct|floatformat:2 }}%
+                                                </span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="text-muted">N/A</span>
+                                        {% endif %}
+                                        <br>
+                                        <small class="text-muted">${{ stock.current_price|floatformat:2 }}</small>
+                                    </div>
+                                </div>
+                                {% if not forloop.last %}
+                                <hr class="my-2">
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Sector Insights -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>Sector Investment Insights
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Strong Sectors</h6>
+                        <ul class="list-unstyled">
+                            {% for sector in sectors_data %}
+                                {% if sector.avg_price_change and sector.avg_price_change > 2 %}
+                                <li class="mb-2">
+                                    <span class="badge bg-success me-2">{{ sector.sector }}</span>
+                                    {{ sector.avg_price_change|floatformat:2 }}% growth
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+
+                        <h6 class="mt-4">Value Opportunities</h6>
+                        <ul class="list-unstyled">
+                            {% for sector in sectors_data %}
+                                {% if sector.avg_pe and sector.avg_pe < 20 %}
+                                <li class="mb-2">
+                                    <span class="badge bg-info me-2">{{ sector.sector }}</span>
+                                    P/E: {{ sector.avg_pe|floatformat:1 }}
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>High Dividend Sectors</h6>
+                        <ul class="list-unstyled">
+                            {% for sector in sectors_data %}
+                                {% if sector.avg_div_yield and sector.avg_div_yield > 2 %}
+                                <li class="mb-2">
+                                    <span class="badge bg-warning me-2">{{ sector.sector }}</span>
+                                    {{ sector.avg_div_yield|floatformat:2 }}% yield
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+
+                        <h6 class="mt-4">Sector Diversification Tips</h6>
+                        <div class="alert alert-warning">
+                            <small>
+                                Consider allocating across multiple sectors to reduce risk.
+                                Technology and Healthcare sectors often show strong growth,
+                                while Utilities and Consumer Staples provide stability.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Market Cap Distribution by Sector -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-warning text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>Market Cap Distribution by Sector
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="marketCapChart" width="100%" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if sectors_data %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Sector Performance Chart
+    const sectorData = {{ sectors_data|safe }};
+    const performanceCtx = document.getElementById('sectorPerformanceChart').getContext('2d');
+
+    const sectors = sectorData.map(s => s.sector);
+    const performances = sectorData.map(s => s.avg_price_change || 0);
+
+    new Chart(performanceCtx, {
+        type: 'bar',
+        data: {
+            labels: sectors,
+            datasets: [{
+                label: 'Average Price Change (%)',
+                data: performances,
+                backgroundColor: performances.map(p =>
+                    p > 0 ? '#28a745' : '#dc3545'
+                ),
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Price Change (%)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+
+    // Market Cap Distribution Chart
+    const marketCapCtx = document.getElementById('marketCapChart').getContext('2d');
+
+    const marketCaps = sectorData.map(s => s.avg_market_cap || 0);
+    const colors = [
+        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+        '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
+    ];
+
+    new Chart(marketCapCtx, {
+        type: 'doughnut',
+        data: {
+            labels: sectors,
+            datasets: [{
+                data: marketCaps,
+                backgroundColor: colors.slice(0, sectors.length),
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                }
+            }
+        }
+    });
+});
+</script>
+{% endif %}
+{% endblock %}

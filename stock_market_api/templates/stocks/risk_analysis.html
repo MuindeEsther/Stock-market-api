@@ -1,0 +1,296 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Risk Analysis - Stock Market Analytics{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h1 class="display-5">
+            <i class="fas fa-shield-alt me-3"></i>Risk Analysis
+        </h1>
+        <p class="lead text-muted">Analyze volatility and risk metrics for your portfolio</p>
+    </div>
+</div>
+
+<!-- Risk Metrics Overview -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>Risk Metrics Overview
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if stocks_data %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Stock</th>
+                                <th>Current Price</th>
+                                <th>Volatility (Annual)</th>
+                                <th>Sharpe Ratio</th>
+                                <th>Risk Level</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in stocks_data %}
+                            <tr>
+                                <td>
+                                    <strong>{{ item.stock.ticker }}</strong><br>
+                                    <small class="text-muted">{{ item.stock.company_name|truncatewords:2 }}</small>
+                                </td>
+                                <td>${{ item.stock.current_price|floatformat:2 }}</td>
+                                <td>
+                                    {{ item.volatility|floatformat:1 }}%
+                                    <div class="progress mt-1" style="height: 6px;">
+                                        {% widthratio item.volatility 100 100 as volatility_percent %}
+                                        <div class="progress-bar
+                                            {% if item.volatility < 20 %}bg-success{% elif item.volatility < 40 %}bg-warning{% else %}bg-danger{% endif %}"
+                                             style="width: {{ volatility_percent }}%">
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if item.sharpe_ratio > 1 %}
+                                        <span class="text-success">
+                                            <i class="fas fa-thumbs-up"></i> {{ item.sharpe_ratio|floatformat:2 }}
+                                        </span>
+                                    {% elif item.sharpe_ratio > 0 %}
+                                        <span class="text-warning">
+                                            <i class="fas fa-minus-circle"></i> {{ item.sharpe_ratio|floatformat:2 }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-danger">
+                                            <i class="fas fa-thumbs-down"></i> {{ item.sharpe_ratio|floatformat:2 }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.volatility < 20 %}
+                                        <span class="badge bg-success">Low Risk</span>
+                                    {% elif item.volatility < 40 %}
+                                        <span class="badge bg-warning">Medium Risk</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">High Risk</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'stocks:stock_detail' item.stock.ticker %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i> View Details
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Risk Summary -->
+                <div class="row mt-4">
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6>Average Volatility</h6>
+                                {% widthratio stocks_data|length 1 1 as total_stocks %}
+                                {% for item in stocks_data %}
+                                    {% if forloop.first %}
+                                        {% widthratio item.volatility total_stocks 1 as avg_volatility %}
+                                    {% else %}
+                                        {% widthratio item.volatility total_stocks 1 as item_volatility %}
+                                        {% widthratio avg_volatility item_volatility 1 as avg_volatility %}
+                                    {% endif %}
+                                {% endfor %}
+                                <h3 class="text-primary">{{ avg_volatility|floatformat:1 }}%</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6>High Risk Stocks</h6>
+                                {% for item in stocks_data %}
+                                    {% if item.volatility >= 40 %}
+                                        {% if forloop.first %}
+                                            {% widthratio 1 1 1 as high_risk_count %}
+                                        {% else %}
+                                            {% widthratio high_risk_count 1 1 as high_risk_count %}
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                                <h3 class="text-danger">{{ high_risk_count|default:0 }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body text-center">
+                                <h6>Low Risk Stocks</h6>
+                                {% for item in stocks_data %}
+                                    {% if item.volatility < 20 %}
+                                        {% if forloop.first %}
+                                            {% widthratio 1 1 1 as low_risk_count %}
+                                        {% else %}
+                                            {% widthratio low_risk_count 1 1 as low_risk_count %}
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                                <h3 class="text-success">{{ low_risk_count|default:0 }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-shield-alt fa-3x text-muted mb-3"></i>
+                    <h5>No Risk Data Available</h5>
+                    <p class="text-muted">Add stocks to your watchlists to see risk analysis</p>
+                    <a href="{% url 'watchlists:watchlist_create' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Create Watchlist
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Risk Insights -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>Risk Management Insights
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Volatility Interpretation</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <span class="badge bg-success me-2">Low Risk</span>
+                                < 20% annual volatility - Stable investments
+                            </li>
+                            <li class="mb-2">
+                                <span class="badge bg-warning me-2">Medium Risk</span>
+                                20-40% annual volatility - Moderate fluctuations
+                            </li>
+                            <li class="mb-2">
+                                <span class="badge bg-danger me-2">High Risk</span>
+                                > 40% annual volatility - High price swings
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Sharpe Ratio Guidelines</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <span class="text-success me-2">> 1.0</span>
+                                Good risk-adjusted returns
+                            </li>
+                            <li class="mb-2">
+                                <span class="text-warning me-2">0.0 - 1.0</span>
+                                Acceptable risk-adjusted returns
+                            </li>
+                            <li class="mb-2">
+                                <span class="text-danger me-2">< 0.0</span>
+                                Poor risk-adjusted returns
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="alert alert-warning">
+                    <h6><i class="fas fa-exclamation-triangle me-2"></i>Risk Management Recommendations</h6>
+                    <ul class="mb-0">
+                        <li>Diversify across different sectors to reduce portfolio volatility</li>
+                        <li>Consider adding low-volatility stocks for stability</li>
+                        <li>Review high-volatility positions regularly</li>
+                        <li>Use stop-loss orders to limit potential losses</li>
+                        <li>Balance high-risk, high-reward stocks with stable investments</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Volatility Chart -->
+{% if stocks_data %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>Portfolio Volatility Comparison
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="volatilityChart" width="100%" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+{% if stocks_data %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Volatility Chart
+    const volatilityData = {{ stocks_data|safe }};
+    const ctx = document.getElementById('volatilityChart').getContext('2d');
+
+    const labels = volatilityData.map(item => item.stock.ticker);
+    const volatilities = volatilityData.map(item => item.volatility);
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Annual Volatility (%)',
+                data: volatilities,
+                backgroundColor: volatilities.map(v =>
+                    v < 20 ? '#28a745' : v < 40 ? '#ffc107' : '#dc3545'
+                ),
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Volatility (%)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Stocks'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+});
+</script>
+{% endif %}
+{% endblock %}

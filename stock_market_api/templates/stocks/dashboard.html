@@ -20,7 +20,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="card-title mb-0">Total Stocks</h6>
-                        <h2 class="mb-0">0</h2>
+                        <h2 class="mb-0">{{ total_tracked_stocks }}</h2>
                     </div>
                     <i class="fas fa-chart-line fa-3x opacity-50"></i>
                 </div>
@@ -34,7 +34,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="card-title mb-0">Watchlists</h6>
-                        <h2 class="mb-0">0</h2>
+                        <h2 class="mb-0">{{ watchlist_count }}</h2>
                     </div>
                     <i class="fas fa-star fa-3x opacity-50"></i>
                 </div>
@@ -48,7 +48,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="card-title mb-0">Alerts</h6>
-                        <h2 class="mb-0">0</h2>
+                        <h2 class="mb-0">{{ active_alerts_count }}</h2>
                     </div>
                     <i class="fas fa-bell fa-3x opacity-50"></i>
                 </div>
@@ -132,19 +132,42 @@
                 <h5 class="mb-0">
                     <i class="fas fa-star me-2"></i>My Watchlists
                 </h5>
-                <button class="btn btn-sm btn-light">
+                <a href="{% url 'watchlists:watchlist_create' %}" class="btn btn-sm btn-light">
                     <i class="fas fa-plus me-2"></i>Create Watchlist
-                </button>
+                </a>
             </div>
             <div class="card-body">
+                {% if user_watchlists %}
+                <div class="row">
+                    {% for watchlist in user_watchlists %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <a href="{% url 'watchlists:watchlist_detail' watchlist.pk %}" class="text-decoration-none">
+                                        {{ watchlist.name }}
+                                    </a>
+                                </h6>
+                                <p class="card-text text-muted small">{{ watchlist.description|truncatewords:10 }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">{{ watchlist.stock_count }} stocks</small>
+                                    <small class="text-muted">{{ watchlist.created_at|date:"M d, Y" }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
                 <div class="text-center py-5">
                     <i class="fas fa-star fa-3x text-muted mb-3"></i>
                     <h5>No Watchlists Yet</h5>
                     <p class="text-muted">Create your first watchlist to track your favorite stocks</p>
-                    <button class="btn btn-primary">
+                    <a href="{% url 'watchlists:watchlist_create' %}" class="btn btn-primary">
                         <i class="fas fa-plus me-2"></i>Create Your First Watchlist
-                    </button>
+                    </a>
                 </div>
+                {% endif %}
             </div>
         </div>
     </div>

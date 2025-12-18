@@ -1,0 +1,260 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Stock Screener - Stock Market Analytics{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h1 class="display-5">
+            <i class="fas fa-filter me-3"></i>Stock Screener
+        </h1>
+        <p class="lead text-muted">Find stocks that match your investment criteria</p>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">
+            <i class="fas fa-sliders-h me-2"></i>Screening Filters
+        </h5>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <!-- Price Range -->
+            <div class="col-md-3">
+                <label class="form-label">Price Range ($)</label>
+                <div class="input-group">
+                    <input type="number" class="form-control" name="min_price" placeholder="Min"
+                           value="{{ filters.min_price }}">
+                    <span class="input-group-text">-</span>
+                    <input type="number" class="form-control" name="max_price" placeholder="Max"
+                           value="{{ filters.max_price }}">
+                </div>
+            </div>
+
+            <!-- Market Cap -->
+            <div class="col-md-3">
+                <label class="form-label">Market Cap ($M)</label>
+                <div class="input-group">
+                    <input type="number" class="form-control" name="min_market_cap" placeholder="Min"
+                           value="{{ filters.min_market_cap }}">
+                    <span class="input-group-text">-</span>
+                    <input type="number" class="form-control" name="max_market_cap" placeholder="Max"
+                           value="{{ filters.max_market_cap }}">
+                </div>
+            </div>
+
+            <!-- P/E Ratio -->
+            <div class="col-md-3">
+                <label class="form-label">P/E Ratio</label>
+                <div class="input-group">
+                    <input type="number" step="0.1" class="form-control" name="min_pe" placeholder="Min"
+                           value="{{ filters.min_pe }}">
+                    <span class="input-group-text">-</span>
+                    <input type="number" step="0.1" class="form-control" name="max_pe" placeholder="Max"
+                           value="{{ filters.max_pe }}">
+                </div>
+            </div>
+
+            <!-- Dividend Yield -->
+            <div class="col-md-3">
+                <label class="form-label">Min Dividend Yield (%)</label>
+                <input type="number" step="0.1" class="form-control" name="min_div_yield"
+                       value="{{ filters.min_div_yield }}">
+            </div>
+
+            <!-- Sector -->
+            <div class="col-md-3">
+                <label class="form-label">Sector</label>
+                <select class="form-select" name="sector">
+                    <option value="">All Sectors</option>
+                    {% for sector in sectors %}
+                    <option value="{{ sector }}" {% if filters.sector == sector %}selected{% endif %}>
+                        {{ sector }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Volume -->
+            <div class="col-md-3">
+                <label class="form-label">Min Volume</label>
+                <input type="number" class="form-control" name="min_volume"
+                       value="{{ filters.min_volume }}">
+            </div>
+
+            <!-- RSI Range -->
+            <div class="col-md-3">
+                <label class="form-label">RSI Range</label>
+                <div class="input-group">
+                    <input type="number" class="form-control" name="rsi_min" placeholder="Min"
+                           value="{{ filters.rsi_min }}">
+                    <span class="input-group-text">-</span>
+                    <input type="number" class="form-control" name="rsi_max" placeholder="Max"
+                           value="{{ filters.rsi_max }}">
+                </div>
+            </div>
+
+            <!-- Sort -->
+            <div class="col-md-3">
+                <label class="form-label">Sort By</label>
+                <select class="form-select" name="sort">
+                    <option value="ticker" {% if filters.sort == 'ticker' %}selected{% endif %}>Ticker</option>
+                    <option value="price" {% if filters.sort == 'price' %}selected{% endif %}>Price</option>
+                    <option value="market_cap" {% if filters.sort == 'market_cap' %}selected{% endif %}>Market Cap</option>
+                    <option value="pe_ratio" {% if filters.sort == 'pe_ratio' %}selected{% endif %}>P/E Ratio</option>
+                    <option value="volume" {% if filters.sort == 'volume' %}selected{% endif %}>Volume</option>
+                </select>
+            </div>
+
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="fas fa-search me-2"></i>Apply Filters
+                </button>
+                <a href="{% url 'stocks:stock_screener' %}" class="btn btn-secondary">
+                    <i class="fas fa-undo me-2"></i>Clear Filters
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Results -->
+<div class="card">
+    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            <i class="fas fa-list me-2"></i>Screening Results ({{ page_obj.paginator.count }} stocks)
+        </h5>
+        <div>
+            <small>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</small>
+        </div>
+    </div>
+    <div class="card-body">
+        {% if page_obj %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Ticker</th>
+                        <th>Company</th>
+                        <th>Sector</th>
+                        <th>Price</th>
+                        <th>Change</th>
+                        <th>Volume</th>
+                        <th>Market Cap</th>
+                        <th>P/E</th>
+                        <th>Div Yield</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stock in page_obj %}
+                    <tr>
+                        <td>
+                            <strong>{{ stock.ticker }}</strong>
+                        </td>
+                        <td>{{ stock.company_name|truncatewords:3 }}</td>
+                        <td>{{ stock.sector|default:"N/A" }}</td>
+                        <td>${{ stock.current_price|floatformat:2 }}</td>
+                        <td>
+                            {% if stock.price_change_percent %}
+                                {% if stock.price_change_percent > 0 %}
+                                    <span class="price-up">
+                                        <i class="fas fa-arrow-up"></i> {{ stock.price_change_percent|floatformat:2 }}%
+                                    </span>
+                                {% elif stock.price_change_percent < 0 %}
+                                    <span class="price-down">
+                                        <i class="fas fa-arrow-down"></i> {{ stock.price_change_percent|floatformat:2 }}%
+                                    </span>
+                                {% else %}
+                                    <span class="text-muted">{{ stock.price_change_percent|floatformat:2 }}%</span>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ stock.volume|intcomma }}</td>
+                        <td>
+                            {% if stock.market_cap %}
+                                ${{ stock.market_cap|intcomma }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td>{{ stock.pe_ratio|floatformat:1|default:"N/A" }}</td>
+                        <td>
+                            {% if stock.dividend_yield %}
+                                {{ stock.dividend_yield|floatformat:2 }}%
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'stocks:stock_detail' stock.ticker %}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Stock screener pagination" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?{{ page_obj.previous_page_number.querystring }}">
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </span>
+                </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}{{ request.GET.urlencode|slice:'1:'|default:'' }}">{{ num }}</a>
+                </li>
+                {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?{{ page_obj.next_page_number.querystring }}">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-search fa-3x text-muted mb-3"></i>
+            <h5>No stocks found</h5>
+            <p class="text-muted">Try adjusting your filters to find more stocks</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

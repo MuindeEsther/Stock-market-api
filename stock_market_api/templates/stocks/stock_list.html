@@ -124,7 +124,7 @@
     {% endif %}
 </div>
 
-<!-- Pagination (if needed) -->
+<!-- Pagination  -->
 {% if is_paginated %}
 <div class="row mt-4">
     <div class="col-md-12">
@@ -158,4 +158,102 @@
     </div>
 </div>
 {% endif %}
+
+<!-- Add to Watchlist Modal -->
+<div class="modal fade" id="addToWatchlistModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add to Watchlist</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Selected Stock: <strong id="selectedTicker"></strong></p>
+                <div id="watchlistsList"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentTicker = '';
+
+function showAddToWatchlist(ticker) {
+    currentTicker = ticker;
+    document.getElementById('selectedTicker').textContent = ticker;
+    
+    // Fetch user's watchlists
+    fetch('/api/watchlists/')
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('watchlistsList');
+            if (data.results && data.results.length > 0) {
+                container.innerHTML = '<div class="list-group">' +
+                    data.results.map(wl => 
+                        `<a href="#" class="list-group-item list-group-item-action" 
+                            onclick="addToWatchlist(${wl.id}, '${ticker}'); return false;">
+                            <i class="fas fa-star me-2"></i>${wl.name}
+                        </a>`
+                    ).join('') +
+                    '</div>' +
+                    '<hr>' +
+                    '<a href="/watchlists/create/" class="btn btn-primary w-100">' +
+                    '<i class="fas fa-plus me-2"></i>Create New Watchlist</a>';
+            } else {
+                container.innerHTML = 
+                    '<p class="text-muted">No watchlists yet</p>' +
+                    '<a href="/watchlists/create/" class="btn btn-primary w-100">' +
+                    '<i class="fas fa-plus me-2"></i>Create Your First Watchlist</a>';
+            }
+            
+            new bootstrap.Modal(document.getElementById('addToWatchlistModal')).show();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to load watchlists');
+        });
+}
+
+function addToWatchlist(watchlistId, ticker) {
+    fetch(`/api/watchlists/${watchlistId}/add-stock/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            ticker: ticker,
+            quantity: 1
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+        } else {
+            alert(`Successfully added ${ticker} to watchlist!`);
+            bootstrap.Modal.getInstance(document.getElementById('addToWatchlistModal')).hide();
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to add stock to watchlist');
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
 {% endblock %}

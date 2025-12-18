@@ -1,0 +1,314 @@
+{% extends 'base/base.html' %}
+
+{% block title %}{{ stock.ticker }} - {{ stock.company_name }}{% endblock %}
+
+{% block content %}
+<!-- Stock Header -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <h1 class="display-6">{{ stock.ticker }}</h1>
+                <p class="lead">{{ stock.company_name }}</p>
+                <div>
+                    <span class="badge bg-secondary me-2">{{ stock.sector|default:"N/A" }}</span>
+                    <span class="badge bg-info me-2">{{ stock.industry|default:"N/A" }}</span>
+                    {% if stock.exchange %}
+                    <span class="badge bg-dark">{{ stock.exchange }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% if user.is_authenticated %}
+            <div class="btn-group">
+                <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="far fa-star me-2"></i>Add to Watchlist
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    {% if user_watchlists %}
+                        {% for watchlist in user_watchlists %}
+                        <li>
+                            <a class="dropdown-item {% if watchlist.id in in_watchlists %}disabled{% endif %}" 
+                               href="#"
+                               onclick="addToWatchlist({{ watchlist.id }}, '{{ stock.ticker }}'); return false;">
+                                {{ watchlist.name }}
+                                {% if watchlist.id in in_watchlists %}
+                                <i class="fas fa-check text-success ms-2"></i>
+                                {% endif %}
+                            </a>
+                        </li>
+                        {% endfor %}
+                        <li><hr class="dropdown-divider"></li>
+                    {% endif %}
+                    <li>
+                        <a class="dropdown-item" href="{% url 'watchlists:watchlist_create' %}">
+                            <i class="fas fa-plus me-2"></i>Create New Watchlist
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            {% else %}
+            <a href="{% url 'users:login' %}" class="btn btn-primary">
+                <i class="far fa-star me-2"></i>Login to Add to Watchlist
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Price Overview -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h2 class="mb-3">
+                    ${{ stock.current_price|floatformat:2 }}
+                    <small class="text-muted fs-5">{{ stock.currency }}</small>
+                </h2>
+                {% if stock.price_change %}
+                <div class="{% if stock.price_change >= 0 %}price-up{% else %}price-down{% endif %} fs-4">
+                    <i class="fas fa-arrow-{% if stock.price_change >= 0 %}up{% else %}down{% endif %} me-2"></i>
+                    ${{ stock.price_change|floatformat:2 }}
+                    ({{ stock.price_change_percent|floatformat:2 }}%)
+                </div>
+                {% endif %}
+                <p class="text-muted mt-2">
+                    <small><i class="fas fa-clock me-1"></i>Last updated: {{ stock.last_updated|date:"M d, Y H:i" }}</small>
+                </p>
+
+                <!-- Price Chart -->
+                <div class="mt-4">
+                    <canvas id="priceChart" height="80"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Key Statistics</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <tr>
+                        <td><strong>Open:</strong></td>
+                        <td class="text-end">${{ stock.open_price|floatformat:2|default:"N/A" }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Previous Close:</strong></td>
+                        <td class="text-end">${{ stock.previous_close|floatformat:2|default:"N/A" }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Day High:</strong></td>
+                        <td class="text-end">${{ stock.day_high|floatformat:2|default:"N/A" }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Day Low:</strong></td>
+                        <td class="text-end">${{ stock.day_low|floatformat:2|default:"N/A" }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Volume:</strong></td>
+                        <td class="text-end">{{ stock.volume|default:"N/A" }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Market Cap:</strong></td>
+                        <td class="text-end">
+                            {% if stock.market_cap %}
+                            ${{ stock.market_cap|floatformat:0 }}
+                            {% else %}
+                            N/A
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>P/E Ratio:</strong></td>
+                        <td class="text-end">{{ stock.pe_ratio|floatformat:2|default:"N/A" }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Dividend Yield:</strong></td>
+                        <td class="text-end">{{ stock.dividend_yield|floatformat:2|default:"N/A" }}%</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Technical Indicators -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-area me-2"></i>Technical Indicators
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if indicators %}
+                <div class="row">
+                    {% for type, indicator in indicators.items %}
+                    <div class="col-md-3 mb-3">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6 class="card-title">{{ indicator.get_indicator_type_display }}</h6>
+                                <p class="h4 mb-0">{{ indicator.value|floatformat:2 }}</p>
+                                <small class="text-muted">Period: {{ indicator.period }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted text-center">No technical indicators available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Historical Data -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-history me-2"></i>Historical Data (Last 30 Days)
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if price_history %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th class="text-end">Open</th>
+                                <th class="text-end">High</th>
+                                <th class="text-end">Low</th>
+                                <th class="text-end">Close</th>
+                                <th class="text-end">Volume</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for price in price_history %}
+                            <tr>
+                                <td>{{ price.date|date:"M d, Y" }}</td>
+                                <td class="text-end">${{ price.open|floatformat:2 }}</td>
+                                <td class="text-end">${{ price.high|floatformat:2 }}</td>
+                                <td class="text-end">${{ price.low|floatformat:2 }}</td>
+                                <td class="text-end">${{ price.close|floatformat:2 }}</td>
+                                <td class="text-end">{{ price.volume|floatformat:0 }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted text-center">No historical data available</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Function to add stock to watchlist
+function addToWatchlist(watchlistId, ticker) {
+    fetch(`/api/watchlists/${watchlistId}/add-stock/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            ticker: ticker,
+            quantity: 1
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+        } else {
+            alert(`Successfully added ${ticker} to watchlist!`);
+            location.reload();
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to add stock to watchlist');
+    });
+}
+
+// Function to get CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Price chart
+    const priceData = [
+        {% for price in price_history %}
+        {
+            date: '{{ price.date|date:"M d" }}',
+            close: {{ price.close }}
+        },
+        {% endfor %}
+    ];
+
+    if (priceData.length > 0) {
+        const ctx = document.getElementById('priceChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: priceData.map(d => d.date),
+                datasets: [{
+                    label: 'Close Price',
+                    data: priceData.map(d => d.close),
+                    borderColor: '#3498db',
+                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                    tension: 0.1,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        ticks: {
+                            callback: function(value) {
+                                return ' + value.toFixed(2);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -127,11 +127,24 @@ def stock_detail_view(request, ticker):
         ).order_by('-date').first()
         if indicator:
             latest_indicators[indicator_type] = indicator
+    
+    # Check if stock is in any of user's watchlists
+    in_watchlists = []
+    user_watchlists = []
+    if request.user.is_authenticated:
+        from watchlists.models import Watchlist, WatchlistItem
+        user_watchlists = Watchlist.objects.filter(owner=request.user)
+        in_watchlists = WatchlistItem.objects.filter(
+            watchlist__in=user_watchlists,
+            stock=stock
+        ).values_list('watchlist_id', flat=True)
             
     context = {
         'stock': stock,
         'price_history': price_history,
         'latest_indicators': latest_indicators,
+        'user_watchlists': user_watchlists,
+        'in_watchlists': list(in_watchlists),
     }
     return render(request, 'stocks/stock_detail.html', context)
 

@@ -30,4 +30,5 @@ urlpatterns = [
     path('alerts/', views.price_alert_list_view, name='alert_list'),
     path('alerts/create/', views.price_alert_create_view, name='alert_create'),
     path('alerts/<int:pk>/delete/', views.price_alert_delete_view, name='alert_delete'),
+    path('quick-add/<str:ticker>/', views.quick_add_to_watchlist, name='quick_add'),
 ]

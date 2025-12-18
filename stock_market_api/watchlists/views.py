@@ -13,7 +13,8 @@ from .serializers import (
 )
 from stocks.models import Stock
 from .forms import WatchListForm, WatchlistItemForm, PriceAlertForm
-
+from django.http import JsonResponse
+from django.views.decorators.http import require_http_methods
 
 # ============ API Views ============
 
@@ -275,3 +276,44 @@ def price_alert_delete_view(request, pk):
         return redirect('watchlists:alert_list')
     
     return render(request, 'watchlists/alert_confirm_delete.html', {'alert': alert})
+
+
+@require_http_methods(["POST"])
+@login_required
+def quick_add_to_watchlist(request, ticker):
+    """Quick add stock to a watchlist via AJAX"""
+    import json
+    
+    try:
+        data = json.loads(request.body)
+        watchlist_id = data.get('watchlist_id')
+        
+        if not watchlist_id:
+            return JsonResponse({'error': 'Watchlist ID required'}, status=400)
+        
+        watchlist = get_object_or_404(Watchlist, pk=watchlist_id, user=request.user)
+        stock = get_object_or_404(Stock, ticker=ticker.upper())
+        
+        # Check if already exists
+        if WatchlistItem.objects.filter(watchlist=watchlist, stock=stock).exists():
+            return JsonResponse({'error': 'Stock already in watchlist'}, status=400)
+        
+        # Create item
+        item = WatchlistItem.objects.create(
+            watchlist=watchlist,
+            stock=stock,
+            quantity=data.get('quantity', 1),
+            buy_price=data.get('buy_price'),
+            notes=data.get('notes', '')
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'message': f'{stock.ticker} added to {watchlist.name}',
+            'item_id': item.id
+        })
+    
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

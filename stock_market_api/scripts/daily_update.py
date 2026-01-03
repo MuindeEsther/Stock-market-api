@@ -13,7 +13,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
 django.setup()
 
 from scripts.fetch_stock_data import StockDataFetcher
-from scripts.calculate_indicators import TechnicalIndicatorCalculator
+from django.core.management import call_command
 
 
 def daily_update():
@@ -30,9 +30,11 @@ def daily_update():
     
     # Step 2: Calculate indicators (last 90 days for faster processing)
     print("Step 2: Calculating technical indicators...")
-    calculator = TechnicalIndicatorCalculator()
-    success, failed = calculator.calculate_for_all_stocks(days=90)
-    print(f"Indicator calculation: {success} successful, {failed} failed\n")
+    try:
+        call_command('calculate_indicators', all=True, days=90)
+        print("Indicator calculation completed\n")
+    except Exception as e:
+        print(f"Error calculating indicators: {e}\n")
     
     print(f"{'='*60}")
     print(f"Daily Update Complete - {datetime.now()}")

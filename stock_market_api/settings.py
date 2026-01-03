@@ -28,7 +28,7 @@ SECRET_KEY = "django-insecure-!dz$iltv5)&jag8h)zpnajkc5bvtze%2#f8yd2f31q+ni=fc51
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost').split(',')
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='127.0.0.1,localhost').split(',')
 
 
 # Application definition
@@ -60,7 +60,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = "stock_market_api.urls"
+ROOT_URLCONF = "urls"
 
 TEMPLATES = [
     {
@@ -77,7 +77,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "stock_market_api.wsgi.application"
+WSGI_APPLICATION = "wsgi.application"
 
 
 # Database

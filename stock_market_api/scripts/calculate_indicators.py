@@ -47,6 +47,13 @@ class TechnicalIndicatorCalculator:
         df['date'] = pd.to_datetime(df['date'])
         df = df.set_index('date')
         
+        # Convert all price columns to float for calculations
+        df['open'] = df['open'].astype(float)
+        df['high'] = df['high'].astype(float)
+        df['low'] = df['low'].astype(float)
+        df['close'] = df['close'].astype(float)
+        df['volume'] = df['volume'].astype(float)
+        
         return stock, df
     
     def calculate_sma(self, df, period=20):
@@ -145,6 +152,10 @@ class TechnicalIndicatorCalculator:
                     
                     # For MACD, we might have multiple values
                     if isinstance(value, tuple):
+                        # Check if any value in the tuple is NaN
+                        if any(pd.isna(v) for v in value):
+                            continue
+                        
                         TechnicalIndicator.objects.update_or_create(
                             stock=stock,
                             indicator_type=indicator_type,

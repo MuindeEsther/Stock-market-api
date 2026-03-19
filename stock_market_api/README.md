@@ -1,416 +1,594 @@
-# Stock Market Analytics API
+# 📊 Stock Market Analytics API
 
-A comprehensive Django REST API that provides real-time and historical stock market data, technical indicators, and personalized watchlist management. Includes a Streamlit dashboard for data visualization and analysis.
+A comprehensive full-stack web application that provides real-time and historical stock market data, technical indicators, and personalized watchlist management for investment teams.
 
-## Features
+[![Deployed on Render](https://img.shields.io/badge/Deployed%20on-Render-46E3B7?style=flat&logo=render)](https://render.com)
+[![Django](https://img.shields.io/badge/Django-4.2-092E20?style=flat&logo=django)](https://www.djangoproject.com/)
+[![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=flat&logo=python)](https://www.python.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=flat&logo=postgresql)](https://www.postgresql.org/)
 
-### Backend API (Django REST Framework)
-- **User Management**: User registration, authentication with JWT tokens, and profile management
-- **Stock Data**: Real-time and historical stock price data via yfinance integration
-- **Technical Indicators**: 
-  - Simple Moving Average (SMA)
-  - Exponential Moving Average (EMA)
-  - Relative Strength Index (RSI)
-  - MACD (Moving Average Convergence Divergence)
-  - Bollinger Bands
-  - Stochastic Oscillator
-  - Average True Range (ATR)
-  - Rate of Change (ROC)
-  - On-Balance Volume (OBV)
-- **Watchlists**: Create, manage, and share personalized stock watchlists
-- **API Documentation**: Interactive Swagger/OpenAPI documentation
-- **Caching**: Redis integration for performance optimization
-- **Rate Limiting**: Built-in request throttling
+---
 
-### Data Processing Scripts
-- Automated stock data fetching from yfinance
-- Technical indicator calculations and storage
-- Advanced portfolio analysis and correlation detection
-- Trend analysis and buy/sell signal generation
-- Statistical analysis and performance metrics
+## 🎯 Problem Statement
 
-### Streamlit Dashboard
-- Interactive stock price charts with Plotly
-- Real-time technical indicator visualization
-- Stock comparison tools
-- Watchlist management interface
-- User authentication system
-- Responsive dark theme UI
+Investment teams face critical challenges in stock market analysis:
+- ❌ **Scattered data sources** – tracking stocks across multiple platforms
+- ❌ **No centralized analytics** – difficult to compare and analyze stocks
+- ❌ **Manual indicator calculation** – time-consuming RSI, MACD, Moving Average calculations
+- ❌ **Poor portfolio tracking** – no unified view of investments
+- ❌ **Delayed decision-making** – lack of organized, actionable insights
 
-## Project Structure
+**Impact:** Investment teams waste valuable hours gathering data instead of making strategic decisions.
 
-\`\`\`
-stock-market-analytics-api/
-├── stock_market_api/           # Django project configuration
-│   ├── settings.py             # Django settings
-│   ├── urls.py                 # URL routing
-│   ├── wsgi.py                 # WSGI configuration
-│   └── middleware.py           # Custom middleware
+---
+
+## ✨ Solution
+
+A **full-stack Stock Market Analytics Platform** that:
+
+✅ **Aggregates real-time stock data** from international markets via yfinance  
+✅ **Calculates technical indicators automatically** (8+ indicators)  
+✅ **Provides portfolio management** through customizable watchlists  
+✅ **Delivers actionable insights** through clean dashboards  
+✅ **Offers RESTful API** for programmatic access  
+✅ **Supports price alerts** for proactive monitoring  
+
+---
+
+## 🚀 Features
+
+### 📱 Web Interface
+- **Responsive Dashboard** – Bootstrap 5 powered UI with dark/light themes
+- **Real-time Stock Tracking** – Live prices, volume, market cap updates
+- **Interactive Charts** – Chart.js visualizations for price trends
+- **Stock Search & Filtering** – Filter by sector, search by ticker/name
+- **User Authentication** – Secure JWT-based login system
+
+### 📊 Technical Analysis
+- **Simple Moving Average (SMA)** – 20, 50, 200-day periods
+- **Exponential Moving Average (EMA)** – 12, 26-day periods
+- **Relative Strength Index (RSI)** – 14-day momentum indicator
+- **MACD** – Moving Average Convergence Divergence
+- **Bollinger Bands** – Volatility and support/resistance levels
+- **Stochastic Oscillator** – Overbought/oversold signals
+- **Average Directional Index (ADX)** – Trend strength
+- **Average True Range (ATR)** – Volatility measurement
+
+### ⭐ Portfolio Management
+- **Custom Watchlists** – Create unlimited watchlists
+- **Position Tracking** – Track quantity, buy price, current value
+- **Gain/Loss Calculation** – Real-time P&L analysis
+- **Target & Stop Loss** – Set investment goals and risk limits
+- **Performance Charts** – Visualize portfolio performance
+
+### 🔔 Price Alerts
+- **Price Above/Below Alerts** – Get notified on target prices
+- **Percentage Change Alerts** – Track momentum breakouts
+- **Alert Management** – Active, triggered, disabled states
+
+### 🔌 RESTful API
+- **Stock Data Endpoints** – Access stock info, prices, indicators
+- **Watchlist API** – Programmatic portfolio management
+- **User Management API** – Authentication and profile endpoints
+- **Comprehensive Documentation** – Clear API reference
+
+---
+
+## 📂 Project Structure
+```
+stock_market_api/
+├── stock_market_api/              # Django project configuration
+│   ├── settings.py                # Base settings
+│   ├── production_settings.py     # Production configuration
+│   ├── urls.py                    # URL routing
+│   └── wsgi.py                    # WSGI entry point
 │
-├── users/                       # User management app
-│   ├── models.py               # User model
-│   ├── serializers.py          # User serializers
-│   ├── views.py                # User viewsets
-│   ├── permissions.py          # Custom permissions
-│   └── urls.py                 # User routes
+├── users/                         # User management
+│   ├── models.py                  # Custom User model with JWT
+│   ├── serializers.py             # DRF serializers
+│   ├── views.py                   # Authentication views
+│   ├── forms.py                   # User forms
+│   └── urls.py                    # User routes
 │
-├── stocks/                      # Stock data app
-│   ├── models.py               # Stock, Price, Indicator models
-│   ├── serializers.py          # Stock serializers
-│   ├── views.py                # Stock viewsets
-│   ├── services.py             # Business logic
-│   ├── urls.py                 # Stock routes
-│   └── management/
-│       └── commands/           # Django management commands
+├── stocks/                        # Stock data management
+│   ├── models.py                  # Stock, StockPrice, TechnicalIndicator
+│   ├── serializers.py             # Stock serializers
+│   ├── views.py                   # Stock views (API + templates)
+│   ├── urls.py                    # Stock routes
+│   └── admin.py                   # Admin interface
 │
-├── watchlists/                  # Watchlist app
-│   ├── models.py               # Watchlist model
-│   ├── serializers.py          # Watchlist serializers
-│   ├── views.py                # Watchlist viewsets
-│   ├── permissions.py          # Watchlist permissions
-│   └── urls.py                 # Watchlist routes
+├── watchlists/                    # Portfolio management
+│   ├── models.py                  # Watchlist, WatchlistItem, PriceAlert
+│   ├── serializers.py             # Watchlist serializers
+│   ├── views.py                   # Watchlist CRUD operations
+│   ├── forms.py                   # Watchlist forms
+│   └── urls.py                    # Watchlist routes
 │
-├── scripts/                     # Data processing scripts
-│   ├── fetch_stock_data.py     # Fetch stock data utility
-│   ├── calculate_indicators.py # Calculate indicators
-│   ├── data_analysis.py        # Analysis utilities
-│   └── management/
-│       └── commands/           # Django CLI commands
+├── scripts/                       # Data automation
+│   ├── fetch_stock_data.py        # yfinance data fetcher
+│   ├── calculate_indicators.py    # Technical indicator calculator
+│   ├── daily_update.py            # Automated daily updates
+│   └── management/commands/       # Django CLI commands
+│       ├── fetch_stocks.py
+│       └── calculate_indicators.py
 │
-├── streamlit_app/              # Streamlit dashboard
-│   ├── app.py                  # Main Streamlit app
-│   ├── api_client.py           # API client wrapper
-│   ├── config.py               # Configuration
-│   └── .streamlit/
-│       └── config.toml         # Streamlit config
+├── templates/                     # Frontend templates
+│   ├── base/base.html             # Base layout with Bootstrap
+│   ├── users/                     # Login, register, profile
+│   ├── stocks/                    # Stock list, detail, dashboard
+│   └── watchlists/                # Watchlist management
 │
-├── requirements.txt            # Python dependencies
-├── setup.sh                    # Project initialization script
-├── .env.example                # Environment variables template
-└── SETUP_GUIDE.md              # Detailed setup instructions
-\`\`\`
+├── static/                        # Static assets
+│   ├── css/                       # Custom styles
+│   ├── js/                        # JavaScript
+│   └── images/                    # Images & icons
+│
+├── requirements.txt               # Python dependencies
+├── build.sh                       # Render build script
+├── runtime.txt                    # Python version
+├── .env.example                   # Environment template
+└── README.md                      # Documentation
+```
 
-## Quick Start
+---
+
+## 🛠️ Tech Stack
+
+### Backend
+- **Framework:** Django 4.2 + Django REST Framework
+- **Database:** PostgreSQL (production) / SQLite (development)
+- **Authentication:** JWT (djangorestframework-simplejwt)
+- **Data Source:** yfinance (Yahoo Finance API)
+- **Server:** Gunicorn + WhiteNoise
+
+### Frontend
+- **UI Framework:** Bootstrap 5
+- **Charts:** Chart.js
+- **Icons:** Font Awesome
+- **JavaScript:** Vanilla JS
+
+### Deployment
+- **Platform:** Render.com
+- **Database:** Render PostgreSQL
+- **Static Files:** WhiteNoise
+- **CI/CD:** GitHub integration
+
+### Data Processing
+- **Data Analysis:** pandas, numpy
+- **Technical Indicators:** Custom Python implementations
+
+---
+
+## 🚀 Quick Start
 
 ### Prerequisites
-- Python 3.10+
-- PostgreSQL or SQLite
-- Redis (optional, for caching)
-- pip or poetry
+- Python 3.11+
+- PostgreSQL (or SQLite for local development)
+- Git
 
-### Installation
+### Local Development Setup
 
 1. **Clone the repository**
-   \`\`\`bash
-   git clone https://github.com/yourusername/stock-market-analytics-api.git
-   cd stock-market-analytics-api
-   \`\`\`
+```bash
+   git clone https://github.com/MuindeEsther/Stock-market-api.git
+   cd Stock-market-api
+```
 
-2. **Run automated setup**
-   \`\`\`bash
-   chmod +x setup.sh
-   ./setup.sh
-   \`\`\`
+2. **Create virtual environment**
+```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
 
-3. **Configure environment variables**
-   \`\`\`bash
+3. **Install dependencies**
+```bash
+   pip install -r requirements.txt
+```
+
+4. **Set up environment variables**
+```bash
    cp .env.example .env
    # Edit .env with your settings
-   \`\`\`
+```
 
-4. **Apply database migrations**
-   \`\`\`bash
+5. **Run migrations**
+```bash
    python manage.py migrate
-   \`\`\`
+```
 
-5. **Create a superuser**
-   \`\`\`bash
+6. **Create superuser**
+```bash
    python manage.py createsuperuser
-   \`\`\`
+```
 
-6. **Start the Django development server**
-   \`\`\`bash
+7. **Load initial stock data**
+```bash
+   python manage.py fetch_stocks --popular --period=1y
+   python manage.py calculate_indicators --all --days=365
+```
+
+8. **Start development server**
+```bash
    python manage.py runserver
-   \`\`\`
+```
 
-7. **In another terminal, start the Streamlit dashboard**
-   \`\`\`bash
-   cd streamlit_app
-   streamlit run app.py
-   \`\`\`
+9. **Access the application**
+   - Web Interface: http://localhost:8000
+   - Admin Panel: http://localhost:8000/admin
+   - API: http://localhost:8000/api/
 
-The API will be available at `http://localhost:8000` and the dashboard at `http://localhost:8501`
+---
 
-## API Endpoints
+## 🌐 Live Demo
+
+**Deployed Application:** [https://your-app-name.onrender.com](https://stock-market-api-v63g.onrender.com/login/)
+
+### Demo Accounts
+- **Email:** demo@stockmarket.com
+- **Password:** Demo123!
+
+---
+
+## 📡 API Endpoints
 
 ### Authentication
-- `POST /api/auth/register/` - Register new user
-- `POST /api/auth/token/` - Obtain JWT tokens
-- `POST /api/auth/token/refresh/` - Refresh access token
-- `GET /api/auth/profile/` - Get user profile
-- `PUT /api/auth/profile/` - Update user profile
+```
+POST   /api/users/register/         # Register new user
+POST   /api/users/login/            # Login (get JWT tokens)
+POST   /api/users/token/refresh/    # Refresh access token
+GET    /api/users/profile/          # Get user profile
+PUT    /api/users/profile/          # Update user profile
+```
 
 ### Stocks
-- `GET /api/stocks/` - List all stocks with filters and pagination
-- `GET /api/stocks/{symbol}/` - Get stock details
-- `GET /api/stocks/{symbol}/history/` - Get historical prices
-- `GET /api/stocks/{symbol}/indicators/` - Get technical indicators
-- `POST /api/stocks/search/` - Search for stocks by name or symbol
+```
+GET    /api/stocks/                 # List all stocks
+GET    /api/stocks/{ticker}/        # Get stock details
+GET    /api/stocks/{ticker}/history/      # Historical prices
+GET    /api/stocks/{ticker}/indicators/   # Technical indicators
+GET    /api/stocks/search/?q={query}      # Search stocks
+```
 
 ### Watchlists
-- `GET /api/watchlists/` - List user's watchlists
-- `POST /api/watchlists/` - Create new watchlist
-- `GET /api/watchlists/{id}/` - Get watchlist details
-- `PUT /api/watchlists/{id}/` - Update watchlist
-- `DELETE /api/watchlists/{id}/` - Delete watchlist
-- `POST /api/watchlists/{id}/stocks/` - Add stock to watchlist
-- `DELETE /api/watchlists/{id}/stocks/{stock_id}/` - Remove stock from watchlist
+```
+GET    /api/watchlists/             # List user watchlists
+POST   /api/watchlists/             # Create watchlist
+GET    /api/watchlists/{id}/        # Get watchlist details
+PUT    /api/watchlists/{id}/        # Update watchlist
+DELETE /api/watchlists/{id}/        # Delete watchlist
+POST   /api/watchlists/{id}/add-stock/    # Add stock
+DELETE /api/watchlists/{id}/remove-stock/{item_id}/  # Remove stock
+```
 
-### Indicators
-- `GET /api/indicators/` - List available indicators
-- `POST /api/indicators/calculate/` - Calculate indicators for a stock
-- `GET /api/indicators/{symbol}/` - Get calculated indicators
+### Price Alerts
+```
+GET    /api/watchlists/alerts/      # List price alerts
+POST   /api/watchlists/alerts/      # Create alert
+DELETE /api/watchlists/alerts/{id}/ # Delete alert
+```
 
-## Data Processing
+---
 
-### Fetch Stock Data
-\`\`\`bash
-python manage.py fetch_stocks AAPL MSFT GOOGL
-\`\`\`
+## 🔧 Environment Variables
 
-### Calculate Technical Indicators
-\`\`\`bash
-python manage.py calculate_indicators AAPL --period=200
-\`\`\`
-
-### Run Data Analysis
-\`\`\`bash
-python scripts/data_analysis.py --symbol=AAPL --analyze-trends
-\`\`\`
-
-## Environment Variables
-
-Create a `.env` file in the project root with the following variables:
-
-\`\`\`
+Create a `.env` file:
+```env
 # Django
-DEBUG=True
 SECRET_KEY=your-secret-key-here
+DEBUG=True
 ALLOWED_HOSTS=localhost,127.0.0.1
 
-# Database (PostgreSQL recommended for production)
+# Database (Local PostgreSQL)
 DB_ENGINE=django.db.backends.postgresql
 DB_NAME=stock_market_db
-DB_USER=postgres
-DB_PASSWORD=your-password
+DB_USER=stock_user
+DB_PASSWORD=your_password
 DB_HOST=localhost
 DB_PORT=5432
 
-# Redis (optional)
-REDIS_URL=redis://localhost:6379/0
+# For Render (Heroku-style DATABASE_URL)
+DATABASE_URL=postgres://user:pass@host:5432/dbname
+```
 
-# JWT
-JWT_SECRET_KEY=your-jwt-secret-key
-JWT_ALGORITHM=HS256
-JWT_EXPIRATION_DELTA=3600
+---
 
-# CORS
-CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8501
+## 📊 Data Management
 
-# yfinance
-YFINANCE_TIMEOUT=30
-\`\`\`
+### Fetch Stock Data
+```bash
+# Fetch popular stocks
+python manage.py fetch_stocks --popular --period=1y
 
-## Streamlit Dashboard Usage
+# Fetch specific stocks
+python manage.py fetch_stocks --tickers=AAPL,MSFT,GOOGL --period=2y
 
-1. **Login/Register**: Create an account or log in with your credentials
-2. **View Stocks**: Search and view detailed stock information with charts
-3. **Analyze Indicators**: View technical indicators and trend analysis
-4. **Manage Watchlists**: Create and organize your personalized watchlists
-5. **Compare Stocks**: Compare multiple stocks side-by-side with performance metrics
+# Update all existing stocks
+python manage.py fetch_stocks --update-all --period=5d
+```
 
-## Technical Indicators Explained
+### Calculate Technical Indicators
+```bash
+# Calculate for specific stock
+python manage.py calculate_indicators --ticker=AAPL --days=365
 
-- **SMA**: Simple Moving Average - Average price over N periods
-- **EMA**: Exponential Moving Average - Weighted average giving more importance to recent prices
-- **RSI**: Relative Strength Index (0-100) - Measures momentum; >70 overbought, <30 oversold
-- **MACD**: Moving Average Convergence Divergence - Trend following momentum indicator
-- **Bollinger Bands**: Upper/middle/lower bands indicating volatility and support/resistance
-- **Stochastic**: Oscillator comparing price to price range; >80 overbought, <20 oversold
-- **ATR**: Average True Range - Volatility indicator
-- **ROC**: Rate of Change - Momentum indicator measuring price velocity
-- **OBV**: On-Balance Volume - Cumulative volume indicator for trend confirmation
+# Calculate for all stocks
+python manage.py calculate_indicators --all --days=365
+```
 
-## Database Models
+### Daily Data Update (Automation)
+```bash
+# Run daily update script
+python scripts/daily_update.py
+```
 
-### User
-- Email, username, password (hashed)
-- First name, last name
-- Timestamps (created_at, updated_at)
+---
 
-### Stock
-- Symbol (unique), name, sector, industry
-- Market cap, PE ratio, dividend yield
-- Last updated timestamp
+## 🎨 Features Showcase
 
-### Price
-- Stock reference, date, open, high, low, close, volume
-- Composite unique key on (stock, date)
+### Dashboard
+- Overview of portfolio performance
+- Quick access to watchlists
+- Top gainers/losers
+- Recent stock updates
 
-### TechnicalIndicator
-- Stock reference, date, indicator type
-- Values for all available calculations
-- Composite unique key on (stock, date, indicator_type)
+### Stock Detail Page
+- Real-time price information
+- 30-day price chart
+- Key statistics (P/E ratio, market cap, volume)
+- Technical indicators panel
+- Historical data table
+- Add to watchlist functionality
 
-### Watchlist
-- User reference, name, description
-- Created/updated timestamps
-- Many-to-many relationship with stocks
+### Watchlist Management
+- Create multiple watchlists
+- Track quantity, buy price, current value
+- Calculate gain/loss ($ and %)
+- Set target prices and stop losses
+- Performance visualization charts
 
-## Development
+### Price Alerts
+- Set price above/below alerts
+- Percentage change notifications
+- Active/triggered/disabled states
+- Alert history tracking
 
-### Running Tests
-\`\`\`bash
-pytest
-\`\`\`
+---
 
-### Code Quality
-\`\`\`bash
-# Format code
-black .
+## 🔐 Security Features
 
-# Check linting
-flake8 .
+- ✅ JWT-based authentication with token refresh
+- ✅ Password hashing (Django's built-in)
+- ✅ CSRF protection
+- ✅ SQL injection prevention (Django ORM)
+- ✅ XSS protection
+- ✅ HTTPS enforcement (production)
+- ✅ Secure cookie settings
+- ✅ CORS configuration
 
-# Type checking
-mypy .
-\`\`\`
+---
 
-### Database Migrations
-\`\`\`bash
-# Create migrations
-python manage.py makemigrations
+## 🚀 Deployment to Render
 
-# Apply migrations
-python manage.py migrate
+### Automatic Deployment
 
-# View migration status
-python manage.py showmigrations
-\`\`\`
+1. **Push to GitHub**
+```bash
+   git add .
+   git commit -m "Deploy to Render"
+   git push origin main
+```
 
-## Deployment
+2. **Render automatically deploys** when you push to main branch
 
-### Using Gunicorn
-\`\`\`bash
-pip install gunicorn
-gunicorn stock_market_api.wsgi:application --bind 0.0.0.0:8000
-\`\`\`
+### Manual Deployment
 
+1. Go to Render Dashboard
+2. Click your web service
+3. Click "Manual Deploy" → "Clear build cache & deploy"
 
+### Environment Variables on Render
 
+Set these in Render Dashboard → Environment:
+```
+SECRET_KEY=your-generated-secret-key
+DEBUG=False
+ALLOWED_HOSTS=.onrender.com
+DATABASE_URL=(automatically set by Render PostgreSQL)
+PYTHON_VERSION=3.11.7
+```
 
-### Environment Setup for Production
-1. Set `DEBUG=False`
-2. Use a production database (PostgreSQL recommended)
-3. Configure secure `SECRET_KEY`
-4. Set up HTTPS
-5. Configure CORS for your frontend domain
-6. Use environment-specific settings file
-7. Set up monitoring and logging
+---
 
-## Contributing
+## 📱 Usage Guide
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+### For Investment Teams
 
-## Troubleshooting
+**Daily Workflow:**
+1. **Morning Market Review**
+   - Login to dashboard
+   - Check watchlist performance
+   - Review overnight price changes
+   - Check triggered alerts
+
+2. **Stock Analysis**
+   - Search for stocks by ticker/sector
+   - View technical indicators
+   - Analyze price trends via charts
+   - Compare against similar stocks
+
+3. **Portfolio Management**
+   - Update positions in watchlists
+   - Set new target prices
+   - Add stop-loss levels
+   - Review gain/loss metrics
+
+4. **Decision Making**
+   - Identify buy/sell signals from indicators
+   - Check RSI for overbought/oversold conditions
+   - Analyze MACD for trend confirmation
+   - Review volume for momentum
+
+---
+
+## 🐛 Troubleshooting
 
 ### Common Issues
 
 **PostgreSQL Connection Error**
-- Ensure PostgreSQL is running: `sudo service postgresql start`
-- Check database credentials in `.env`
-- Verify DB_HOST and DB_PORT settings
+```bash
+# Ensure PostgreSQL is running
+sudo service postgresql start  # Linux
+brew services start postgresql  # Mac
 
-**Redis Connection Error**
-- Install Redis: `brew install redis` (macOS) or `sudo apt-get install redis-server` (Linux)
-- Start Redis: `redis-server`
-- Check REDIS_URL in `.env`
+# Check credentials in .env
+psql -U stock_user -d stock_market_db
+```
 
-**Streamlit Dashboard Not Connecting to API**
-- Verify Django server is running on `http://localhost:8000`
-- Check CORS settings in Django
-- Verify API_URL in Streamlit config
+**Static Files Not Loading**
+```bash
+python manage.py collectstatic --no-input
+```
 
-**No Module Named Error**
-- Activate virtual environment
-- Run `pip install -r requirements.txt`
-- Ensure Python version is 3.10+
+**Module Not Found Error**
+```bash
+pip install -r requirements.txt
+```
 
-**yfinance Timeout Issues**
-- Increase `YFINANCE_TIMEOUT` in `.env`
+**yfinance Timeout**
 - Check internet connection
-- Try fetching different stocks
+- Try fetching fewer stocks at once
+- Increase timeout in settings
 
-## Performance Optimization
-
-- **Caching**: Enable Redis for price caching (TTL: 5 minutes)
-- **Database Indexing**: Automatically created on symbol and date fields
-- **Pagination**: API uses cursor-based pagination for large datasets
-- **Rate Limiting**: 1000 requests per hour per user
-- **Data Compression**: API responses use gzip compression
-
-## API Documentation
-
-Interactive API documentation available at:
-- **Swagger UI**: `http://localhost:8000/api/schema/swagger/`
-- **ReDoc**: `http://localhost:8000/api/schema/redoc/`
-- **OpenAPI Schema**: `http://localhost:8000/api/schema/`
-
-## Security Features
-
-- JWT-based authentication with token refresh
-- Row-level security with user-based access control
-- CORS protection
-- Rate limiting and throttling
-- Input validation and sanitization
-- SQL injection prevention via ORM
-- CSRF protection for form submissions
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Support
-
-For issues and questions:
-1. Check the SETUP_GUIDE.md for detailed setup instructions
-2. Review existing GitHub issues
-3. Create a new GitHub issue with detailed information
-4. Contact: support@example.com
-
-## Roadmap
-
-- [ ] Real-time WebSocket updates for price data
-- [ ] Machine learning-based price predictions
-- [ ] Advanced portfolio optimization algorithms
-- [ ] Social features (follow other traders, share analysis)
-- [ ] Mobile app (React Native)
-- [ ] Email alerts for watchlist changes
-- [ ] Integration with trading platforms (Alpaca, Interactive Brokers)
-- [ ] Advanced charting library (TradingView integration)
-
-## Acknowledgments
-
-- Django and Django REST Framework teams
-- yfinance library for stock data
-- Streamlit for the dashboard framework
-- Plotly for interactive charts
-- All contributors and users
+**Render App Sleeping (Free Tier)**
+- First request after 15 min inactivity takes 30-40 seconds
+- Consider upgrading to paid tier for production use
 
 ---
 
-Built with Django, Python, and Streamlit. Made for data-driven investors and traders.
+## 🔄 CI/CD Pipeline
+
+### GitHub → Render Auto-Deploy
+
+1. Push code to GitHub
+2. Render detects changes
+3. Runs `build.sh`:
+   - Installs dependencies
+   - Collects static files
+   - Runs migrations
+4. Starts application with Gunicorn
+5. App goes live automatically
+
+---
+
+## 🎯 Roadmap
+
+### Phase 1 (Completed ✅)
+- [x] User authentication system
+- [x] Stock data fetching
+- [x] Technical indicators calculation
+- [x] Watchlist management
+- [x] Price alerts
+- [x] Responsive web interface
+- [x] RESTful API
+- [x] Render deployment
+
+### Phase 2 (In Progress 🚧)
+- [ ] Email notifications for alerts
+- [ ] Export portfolio to PDF/Excel
+- [ ] Advanced charting (candlesticks)
+- [ ] Real-time WebSocket updates
+- [ ] Mobile responsive improvements
+
+### Phase 3 (Planned 📋)
+- [ ] International market expansion (LSE, NSE, TSE)
+- [ ] ML-based price predictions
+- [ ] Social features (share watchlists)
+- [ ] Mobile app (React Native)
+- [ ] Integration with trading platforms
+- [ ] Advanced portfolio optimization
+
+---
+
+## 📈 Performance Optimization
+
+- **Database Indexing:** Optimized queries on ticker, date fields
+- **Static File Serving:** WhiteNoise for efficient delivery
+- **Pagination:** API responses paginated (20 items/page)
+- **Query Optimization:** select_related() and prefetch_related()
+- **Future:** Redis caching for frequently accessed data
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository
+2. Create feature branch 
+3. Commit changes 
+4. Push to branch
+5. Open Pull Request
+
+### Code Style
+- Follow PEP 8 guidelines
+- Add docstrings to functions
+- Write meaningful commit messages
+- Add tests for new features
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 👥 Authors
+
+**Your Name**
+- GitHub: [@MuindeEsther](https://github.com/MuindeEsther)
+- LinkedIn: [Your LinkedIn](https://linkedin.com/in/yourprofile)
+- Email: your.email@example.com
+
+---
+
+## 🙏 Acknowledgments
+
+- **Django & DRF** – Robust web framework
+- **yfinance** – Stock market data provider
+- **Render** – Deployment platform
+- **Bootstrap** – UI framework
+- **Chart.js** – Data visualization
+- **All contributors and users**
+
+---
+
+## 📞 Support
+
+For questions and support:
+
+1. Check existing [GitHub Issues](https://github.com/MuindeEsther/Stock-market-api/issues)
+2. Create a new issue with detailed information
+3. Email: support@example.com
+
+---
+
+## ⭐ Star History
+
+If you find this project useful, please consider giving it a star!
+
+[![Star History Chart](https://api.star-history.com/svg?repos=MuindeEsther/Stock-market-api&type=Date)](https://star-history.com/#MuindeEsther/Stock-market-api&Date)
+
+---
+
+**Built with ❤️ using Django, Python, and Bootstrap**  
+**Made for data-driven investors and investment teams**
+
+---
+
+### 📊 Project Stats
+
+![GitHub last commit](https://img.shields.io/github/last-commit/MuindeEsther/Stock-market-api)
+![GitHub issues](https://img.shields.io/github/issues/MuindeEsther/Stock-market-api)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/MuindeEsther/Stock-market-api)
+![GitHub](https://img.shields.io/github/license/MuindeEsther/Stock-market-api)

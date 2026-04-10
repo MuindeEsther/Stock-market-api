@@ -34,7 +34,7 @@ class Watchlist(models.Model):
         total = 0
         for item in self.items.select_related('stock'):
             if item.stock.current_price:
-                total += float(item.stock.current_price) * item.quantity
+                total += float(item.stock.current_price) * float(item.quantity)
         return total
     
     @property
@@ -42,8 +42,9 @@ class Watchlist(models.Model):
         # Calculate total gain/loss of all stocks in the watchlist
         total = 0
         for item in self.items.select_related('stock'):
-            if item.stock.current_price and item.stock.price_change:
-                total += (float(item.stock.current_price) - float(item.purchase_price)) * item.quantity
+            if item.stock.current_price and item.buy_price:
+                gain_loss_per_share = float(item.stock.current_price) - float(item.buy_price)
+                total += gain_loss_per_share * float(item.quantity)
         return total
     
 class WatchlistItem(models.Model):

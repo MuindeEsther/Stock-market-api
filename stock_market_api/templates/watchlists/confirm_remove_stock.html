@@ -1,0 +1,98 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Remove Stock from Watchlist - Stock Market Analytics{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'watchlists:watchlist_list' %}">Watchlists</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'watchlists:watchlist_detail' watchlist.pk %}">{{ watchlist.name }}</a></li>
+                <li class="breadcrumb-item active">Remove Stock</li>
+            </ol>
+        </nav>
+
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-trash me-2"></i>Confirm Removal
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning" role="alert">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Are you sure?</strong> You are about to remove <strong>{{ item.stock.ticker }}</strong> from your watchlist "{{ watchlist.name }}".
+                </div>
+
+                <div class="card bg-light mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-chart-line me-2"></i>{{ item.stock.ticker }}
+                        </h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-1">
+                                    <small class="text-muted">Company Name:</small><br>
+                                    <strong>{{ item.stock.company_name }}</strong>
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1">
+                                    <small class="text-muted">Current Price:</small><br>
+                                    <strong>${{ item.stock.current_price }}</strong>
+                                </p>
+                            </div>
+                        </div>
+                        {% if item.quantity %}
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <p class="mb-0">
+                                    <small class="text-muted">Quantity:</small><br>
+                                    <strong>{{ item.quantity }}</strong>
+                                </p>
+                            </div>
+                            {% if item.buy_price %}
+                            <div class="col-md-6">
+                                <p class="mb-0">
+                                    <small class="text-muted">Buy Price:</small><br>
+                                    <strong>${{ item.buy_price }}</strong>
+                                </p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <form method="post" class="d-inline">
+                    {% csrf_token %}
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-2"></i>Yes, Remove Stock
+                        </button>
+                        <a href="{% url 'watchlists:watchlist_detail' watchlist.pk %}" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-info-circle me-2"></i>What Happens Next
+                </h5>
+                <ul class="mb-0">
+                    <li><strong>{{ item.stock.ticker }}</strong> will be removed from the "{{ watchlist.name }}" watchlist</li>
+                    <li>You can add it back at any time</li>
+                    <li>This action cannot be undone, but it's not permanent</li>
+                    <li>Your other watchlists won't be affected</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

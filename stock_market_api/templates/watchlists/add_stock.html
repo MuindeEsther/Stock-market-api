@@ -1,0 +1,166 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Add Stock to Watchlist - Stock Market Analytics{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'watchlists:watchlist_list' %}">Watchlists</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'watchlists:watchlist_detail' watchlist.pk %}">{{ watchlist.name }}</a></li>
+                <li class="breadcrumb-item active">Add Stock</li>
+            </ol>
+        </nav>
+
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-plus me-2"></i>Add Stock to "{{ watchlist.name }}"
+                </h4>
+            </div>
+            <div class="card-body">
+                {% if messages %}
+                <div class="alert alert-dismissible fade show" role="alert">
+                    {% for message in messages %}
+                    <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %}">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.ticker.id_for_label }}" class="form-label">
+                            <i class="fas fa-barcode me-2"></i>Stock Ticker *
+                        </label>
+                        {{ form.ticker }}
+                        {% if form.ticker.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.ticker.errors }}
+                        </div>
+                        {% endif %}
+                        <small class="form-text text-muted d-block mt-1">
+                            Enter the stock ticker symbol (e.g., AAPL, GOOGL, MSFT)
+                        </small>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.quantity.id_for_label }}" class="form-label">
+                                    <i class="fas fa-layer-group me-2"></i>Quantity
+                                </label>
+                                {{ form.quantity }}
+                                {% if form.quantity.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.quantity.errors }}
+                                </div>
+                                {% endif %}
+                                <small class="form-text text-muted d-block mt-1">
+                                    Number of shares to track
+                                </small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.buy_price.id_for_label }}" class="form-label">
+                                    <i class="fas fa-dollar-sign me-2"></i>Buy Price
+                                </label>
+                                {{ form.buy_price }}
+                                {% if form.buy_price.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.buy_price.errors }}
+                                </div>
+                                {% endif %}
+                                <small class="form-text text-muted d-block mt-1">
+                                    Price at which you bought (optional)
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.target_price.id_for_label }}" class="form-label">
+                                    <i class="fas fa-bullseye me-2"></i>Target Price
+                                </label>
+                                {{ form.target_price }}
+                                {% if form.target_price.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.target_price.errors }}
+                                </div>
+                                {% endif %}
+                                <small class="form-text text-muted d-block mt-1">
+                                    Your target selling price (optional)
+                                </small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.stop_loss.id_for_label }}" class="form-label">
+                                    <i class="fas fa-shield-alt me-2"></i>Stop Loss
+                                </label>
+                                {{ form.stop_loss }}
+                                {% if form.stop_loss.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ form.stop_loss.errors }}
+                                </div>
+                                {% endif %}
+                                <small class="form-text text-muted d-block mt-1">
+                                    Your stop loss price (optional)
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.notes.id_for_label }}" class="form-label">
+                            <i class="fas fa-sticky-note me-2"></i>Notes
+                        </label>
+                        {{ form.notes }}
+                        {% if form.notes.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.notes.errors }}
+                        </div>
+                        {% endif %}
+                        <small class="form-text text-muted d-block mt-1">
+                            Add any notes or reasoning for this stock (optional)
+                        </small>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Add Stock to Watchlist
+                        </button>
+                        <a href="{% url 'watchlists:watchlist_detail' watchlist.pk %}" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-info-circle me-2"></i>Tips for Adding Stocks
+                </h5>
+                <ul class="mb-0">
+                    <li><strong>Ticker:</strong> Use the stock symbol (e.g., AAPL for Apple)</li>
+                    <li><strong>Quantity:</strong> How many shares you own or plan to own</li>
+                    <li><strong>Buy Price:</strong> Helps calculate your gain/loss</li>
+                    <li><strong>Target & Stop Loss:</strong> Set your investment boundaries</li>
+                    <li><strong>Notes:</strong> Document your investment reasoning</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

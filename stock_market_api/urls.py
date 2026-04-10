@@ -31,7 +31,8 @@ urlpatterns = [
     path('health/', home),
     path("admin/", admin.site.urls),
     path('api/users/', include('users.api_urls')),
-    path('api/stocks/', include('stocks.urls')),
+    path('api/stocks/', include('stocks.urls')),  # API endpoints
+    path('stocks/', include('stocks.template_urls')),  # Template views
     path('watchlists/', include('watchlists.urls')),
     # Template routes
     

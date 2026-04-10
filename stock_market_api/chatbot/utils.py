@@ -1,12 +1,16 @@
 """Chatbot configuration and utilities"""
 import os
 from decouple import config
-import openai
+from openai import OpenAI
 
 # Configure OpenAI
 OPENAI_API_KEY = config('OPENAI_API_KEY', default=None)
+
+# Initialize OpenAI client
 if OPENAI_API_KEY:
-    openai.api_key = OPENAI_API_KEY
+    client = OpenAI(api_key=OPENAI_API_KEY)
+else:
+    client = None
 
 # System prompt for the chatbot
 STOCK_MARKET_API_SYSTEM_PROMPT = """You are a helpful customer support assistant for the Stock Market Analytics API - a web application that helps users track stocks, analyze portfolios, and make investment decisions.
@@ -46,11 +50,11 @@ def get_chatbot_response(messages: list) -> str:
     Returns:
         String response from ChatGPT
     """
-    if not OPENAI_API_KEY:
-        return "I'm sorry, the chatbot is not configured. Please contact support."
+    if not client or not OPENAI_API_KEY:
+        return "I'm sorry, the chatbot is not configured. Please add your OpenAI API key and restart the server."
     
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": STOCK_MARKET_API_SYSTEM_PROMPT},
@@ -62,5 +66,15 @@ def get_chatbot_response(messages: list) -> str:
         
         return response.choices[0].message.content
     except Exception as e:
-        print(f"OpenAI Error: {str(e)}")
-        return f"I encountered an error: {str(e)}. Please try again later."
+        error_msg = str(e)
+        print(f"OpenAI Error: {error_msg}")
+        
+        # Provide helpful error messages
+        if "401" in error_msg or "authentication" in error_msg.lower():
+            return "Authentication error: Please check your OpenAI API key."
+        elif "rate_limit" in error_msg.lower():
+            return "API rate limit exceeded. Please try again in a moment."
+        elif "timeout" in error_msg.lower():
+            return "Request timed out. Please check your internet connection and try again."
+        else:
+            return f"Error: {error_msg[:100]}. Please try again later."

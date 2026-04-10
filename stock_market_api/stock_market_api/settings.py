@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "watchlists",
     "scripts",
     "chatbot",
+    "predictions",
 ]
 
 MIDDLEWARE = [

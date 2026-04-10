@@ -372,6 +372,7 @@ def portfolio_analytics_view(request):
         if item.stock.current_price:
             current_value = float(item.stock.current_price) * float(item.quantity)
             cost_basis = float(item.buy_price or item.stock.current_price) * float(item.quantity)
+            gain_loss = current_value - cost_basis
 
             portfolio_data.append({
                 'stock': item.stock,
@@ -380,7 +381,8 @@ def portfolio_analytics_view(request):
                 'buy_price': item.buy_price,
                 'current_value': current_value,
                 'cost_basis': cost_basis,
-                'gain_loss': current_value - cost_basis,
+                'gain_loss': gain_loss,
+                'gain_loss_abs': abs(gain_loss),
                 'gain_loss_percent': ((current_value - cost_basis) / cost_basis * 100) if cost_basis > 0 else 0,
                 'watchlist': item.watchlist,
             })
@@ -389,10 +391,12 @@ def portfolio_analytics_view(request):
             total_cost += cost_basis
 
     # Calculate portfolio statistics
+    total_gain_loss = total_value - total_cost
     portfolio_stats = {
         'total_value': total_value,
         'total_cost': total_cost,
-        'total_gain_loss': total_value - total_cost,
+        'total_gain_loss': total_gain_loss,
+        'total_gain_loss_abs': abs(total_gain_loss),
         'total_gain_loss_percent': ((total_value - total_cost) / total_cost * 100) if total_cost > 0 else 0,
         'stock_count': len(portfolio_data),
     }

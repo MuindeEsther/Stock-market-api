@@ -39,7 +39,7 @@
                             {% if portfolio_stats.total_gain_loss >= 0 %}
                                 +${{ portfolio_stats.total_gain_loss|floatformat:2|intcomma }}
                             {% else %}
-                                -${{ portfolio_stats.total_gain_loss|abs|floatformat:2|intcomma }}
+                                -${{ portfolio_stats.total_gain_loss_abs|floatformat:2|intcomma }}
                             {% endif %}
                         </h2>
                         <small>
@@ -128,7 +128,7 @@
                                         </span>
                                     {% else %}
                                         <span class="price-down">
-                                            <i class="fas fa-arrow-down"></i> ${{ item.gain_loss|abs|floatformat:2 }}
+                                            <i class="fas fa-arrow-down"></i> ${{ item.gain_loss_abs|floatformat:2 }}
                                             ({{ item.gain_loss_percent|floatformat:2 }}%)
                                         </span>
                                     {% endif %}

@@ -60,6 +60,91 @@ class TechnicalIndicatorListAPIView(generics.ListAPIView):
             queryset = queryset.filter(indicator_type=indicator_type)
             
         return queryset.order_by('date')
+
+
+class StockScreenerAPIView(generics.ListAPIView):
+    """API endpoint for advanced stock screening with multiple filters"""
+    serializer_class = StockListSerializer
+    permission_classes = [AllowAny]
+    
+    def get_queryset(self):
+        stocks = Stock.objects.filter(is_active=True)
+        
+        # Price filters
+        min_price = self.request.query_params.get('min_price')
+        if min_price:
+            stocks = stocks.filter(current_price__gte=float(min_price))
+            
+        max_price = self.request.query_params.get('max_price')
+        if max_price:
+            stocks = stocks.filter(current_price__lte=float(max_price))
+        
+        # Market cap filters
+        min_market_cap = self.request.query_params.get('min_market_cap')
+        if min_market_cap:
+            stocks = stocks.filter(market_cap__gte=int(min_market_cap))
+            
+        max_market_cap = self.request.query_params.get('max_market_cap')
+        if max_market_cap:
+            stocks = stocks.filter(market_cap__lte=int(max_market_cap))
+        
+        # P/E ratio filters
+        min_pe = self.request.query_params.get('min_pe')
+        if min_pe:
+            stocks = stocks.filter(pe_ratio__gte=float(min_pe))
+            
+        max_pe = self.request.query_params.get('max_pe')
+        if max_pe:
+            stocks = stocks.filter(pe_ratio__lte=float(max_pe))
+        
+        # Dividend yield filter
+        min_div_yield = self.request.query_params.get('min_div_yield')
+        if min_div_yield:
+            stocks = stocks.filter(dividend_yield__gte=float(min_div_yield))
+        
+        # Sector filter
+        sector = self.request.query_params.get('sector')
+        if sector:
+            stocks = stocks.filter(sector__iexact=sector)
+        
+        # Volume filter
+        min_volume = self.request.query_params.get('min_volume')
+        if min_volume:
+            stocks = stocks.filter(volume__gte=int(min_volume))
+        
+        # Technical indicator filters (RSI)
+        rsi_min = self.request.query_params.get('rsi_min')
+        rsi_max = self.request.query_params.get('rsi_max')
+        if rsi_min or rsi_max:
+            rsi_stocks = TechnicalIndicator.objects.filter(
+                indicator_type='RSI',
+                date__gte=datetime.now().date() - timedelta(days=7)
+            ).values('stock')
+            
+            if rsi_min:
+                rsi_stocks = rsi_stocks.filter(value__gte=float(rsi_min))
+            if rsi_max:
+                rsi_stocks = rsi_stocks.filter(value__lte=float(rsi_max))
+            
+            stock_ids = [item['stock'] for item in rsi_stocks]
+            stocks = stocks.filter(id__in=stock_ids)
+        
+        # Sort options
+        sort_by = self.request.query_params.get('sort', 'ticker')
+        sort_options = {
+            'ticker': 'ticker',
+            'price': 'current_price',
+            'market_cap': 'market_cap',
+            'pe_ratio': 'pe_ratio',
+            'volume': 'volume',
+        }
+        
+        if sort_by in sort_options:
+            stocks = stocks.order_by(sort_options[sort_by])
+        else:
+            stocks = stocks.order_by('ticker')
+        
+        return stocks
     
 @api_view(['GET'])
 @permission_classes([AllowAny])

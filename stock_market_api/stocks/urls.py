@@ -6,6 +6,7 @@ app_name = 'stocks'
 urlpatterns = [
     # API endpoints
     path('api/stocks/', views.StockListAPIView.as_view(), name='api_stock-list'),
+    path('api/stocks/screener/', views.StockScreenerAPIView.as_view(), name='api_stock_screener'),
     path('api/<str:ticker>/', views.StockDetailAPIView.as_view(), name='api_stock_detail'),
     path('api/<str:ticker>/history/', views.StockPriceHistoryAPIView.as_view(), name='api_stock_history'),
     path('api/<str:ticker>/indicators/', views.TechnicalIndicatorListAPIView.as_view(), name='api_stock_indicators'),

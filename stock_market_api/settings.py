@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "stocks",
     "watchlists",
     "scripts",
+    "chatbot",
 ]
 
 MIDDLEWARE = [

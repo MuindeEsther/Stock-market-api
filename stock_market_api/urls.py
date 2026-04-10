@@ -32,6 +32,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path('api/users/', include('users.api_urls')),
     path('api/stocks/', include('stocks.urls')),  # Both API and template views
+    path('api/chatbot/', include('chatbot.urls')),  # Chatbot endpoints
     path('watchlists/', include('watchlists.urls')),
     
     path('', include('users.urls', 'users')),  # For user templates
